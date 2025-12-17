@@ -11,8 +11,12 @@ and thanks for taking the time to check it out!
 - [Composer](https://getcomposer.org/)
 - [sed](https://www.gnu.org/software/sed/) (preinstalled in most UNIX systems)
 
-> All of the above must be present in the CLI/path since composer
+> - All of the above must be present in the CLI/path since composer
 will try to run them with their commands
+> - For windows the Windows Subsystem for Linux (WSL) is recommended,
+since it has pgsql drivers pre-installed (if not they have to be set php.ini)
+> - If your local env cannot setup the pgsql driver, a last resource can be
+to build the container and run any tests inside of app-1 with docker
 
 - Set up a `.env` file (see `.env.example` for reference, the actual `.env` should
 have been provided privately), make sure the file exists and is populated.
@@ -22,7 +26,10 @@ have been provided privately), make sure the file exists and is populated.
 
 1. Run `composer setup` in the root of this folder to fetch dependencies.
 
-2. You can run tests to verify integrity with `composer test`.
+2. You can run tests to verify integrity with `composer test`. If your system
+is not computing the local pgsql database due to driver issues, please skip
+this test and run the build. You can still perform any task directly in the
+container to avoid any local environment constraints.
 
 3.
     - Run `composer build` for running it containerized @ localhost:80
@@ -76,12 +83,11 @@ run `psql -U lawnstarter_admin -d star_wars`
 preprend localhost:8000 for dev or localhost:80 for container.
 Can be viewed in cURL, browser or any networking tool.
 
+- For tests run `composer test`
+
 ### Disclaimer
 
 - No AI wrote this code, it's only use was for research purposes (sort of like an
 advanced google), most scaffolding is boilerplate coming from `laravel new`
 command and looking at the `sail` setup and adapting it for the PostgreSQL setup,
 I tried to remove most of the unneeded boilerplate but some might've sneaked in there
-
-- I didn't get around to writing unit tests due to work hangups and time constraints,
-but I prioritized error handling, full functionality and optimizations (like caching).

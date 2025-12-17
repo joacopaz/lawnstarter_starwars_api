@@ -46,21 +46,20 @@
             "docker compose down",
             "sed -i 's/DB_HOST=.*$/DB_HOST=localhost/g' .env",
             "docker compose up pgsql -d",
-            "until docker compose exec pgsql pg_isready; do echo 'Waiting for DB setup...'; sleep 1; done",
+            "php wait_for_db.php",
             "Composer\\Config::disableProcessTimeout",
             "php artisan migrate --force",
             "npx concurrently -c \"#93c5fd,#c4b5fd,#fb7185,#fdba74\" \"php artisan serve\" \"php artisan queue:listen --tries=1\" \"php artisan pail --timeout=0\" \"npm run dev\" --names=server,queue,logs,vite --kill-others"
         ],
         "test": [
             "docker compose up pgsql -d",
-            "until docker compose exec pgsql pg_isready; do echo 'Waiting for DB setup...'; sleep 1; done",
+            "php wait_for_db.php",
             "@php artisan config:clear --ansi",
             "@php artisan migrate --env=testing --force",
             "@php artisan test"
         ],
         "build": [
             "docker compose down",
-            "composer test",
             "sed -i 's/DB_HOST=.*$/DB_HOST=pgsql/g' .env",
             "npm run build:ssr",
             "docker compose up --build -d"
