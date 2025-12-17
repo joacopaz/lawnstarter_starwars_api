@@ -20,5 +20,6 @@ class QueryStatistic extends Model
     protected $casts = [
         'top_five_queries' => 'array',
         'calculated_at' => 'datetime',
+        'average_duration_ms' => 'float',
     ];
 }

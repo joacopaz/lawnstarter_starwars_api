@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Enums\ResourceType;
 use App\Exceptions\IncorrectSwapiResourceException;
 use App\Exceptions\SwapiLookupFailedException;
 use App\Models\Query;
@@ -14,7 +15,7 @@ use RuntimeException;
 
 class SwApiService
 {
-    private string $baseUrl = 'https://swapi.tech/api/';
+    private string $baseUrl = 'https://swapi.tech/api';
 
     public function __construct(protected readonly Query $queryModel) {}
 
@@ -37,16 +38,16 @@ class SwApiService
             $servedFromCache = true;
             $swApiData = Cache::get($cacheKey);
         } else {
-            $parsedResourceType = $this->parseResourceType($resourceType);
-            $url = "{$this->baseUrl}{$parsedResourceType}";
+            $parsedResourceType = $this->parseResourceType($resourceType)->value;
+            $url = "{$this->baseUrl}/{$parsedResourceType}";
             $queryKey = $parsedResourceType === 'people' ? 'name' : 'title';
             Log::debug("Reaching out to external api {$url}?{$queryKey}={$query}");
 
             try {
+                /** @var \Illuminate\Http\Client\Response $apiResponse */
                 $apiResponse = Http::timeout(5)->get($url, [
                     $queryKey => $query,
                 ]);
-
                 if ($apiResponse->failed()) {
                     throw new SwapiLookupFailedException;
                 }
@@ -85,15 +86,16 @@ class SwApiService
      */
     public function getResourceMetadata(string $resourceType, string $uid): array
     {
-        $parsedResourceType = $this->parseResourceType($resourceType);
+        $parsedResourceType = $this->parseResourceType($resourceType)->value;
         $cacheKey = "swapi:meta:{$parsedResourceType}:{$uid}";
 
         return Cache::rememberForever($cacheKey, function () use ($uid, $parsedResourceType) {
-            $url = "{$this->baseUrl}{$parsedResourceType}/{$uid}";
+            $url = "{$this->baseUrl}/{$parsedResourceType}/{$uid}";
 
             try {
                 Log::debug("Reaching out to external api {$url}");
 
+                /** @var \Illuminate\Http\Client\Response $apiResponse */
                 $apiResponse = Http::timeout(5)->get($url);
 
                 if ($apiResponse->failed()) {
@@ -101,7 +103,6 @@ class SwApiService
                 }
 
                 $result = $apiResponse->json('result', []);
-
                 // characters appear in an array of films, films star an array of characters
                 $keyToUnpack = $parsedResourceType === 'people' ? 'films' : 'characters';
                 $result['properties'][$keyToUnpack] = $this->mapResourceUrlsToNames($parsedResourceType, $result['properties'][$keyToUnpack]);
@@ -116,6 +117,7 @@ class SwApiService
     private function mapResourceUrlsToNames(string $resourceType, array $resourceUrls): array
     {
         if (! $resourceUrls) {
+
             return [];
         }
         $result = [];
@@ -160,20 +162,19 @@ class SwApiService
      * Validates a string resource type and casts it to a valid SWAPI value
      *
      * @param  string  $resourceType  The resource to search (e.g., 'People' | 'Movies').
-     * @return string Parsed valid value
      *
      * @throws IncorrectSwapiResourceException if the resource type is invalid
      */
-    private function parseResourceType(string $resourceType): string
+    private function parseResourceType(string $resourceType): ResourceType
     {
         switch ($resourceType) {
             case 'People':
             case 'people':
-                return 'people';
+                return ResourceType::People;
                 break;
             case 'Movies':
             case 'movies':
-                return 'films';
+                return ResourceType::Films;
                 break;
             default:
                 throw new IncorrectSwapiResourceException;

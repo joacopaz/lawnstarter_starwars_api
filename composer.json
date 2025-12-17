@@ -20,7 +20,9 @@
         "laravel/pail": "^1.2.2",
         "laravel/pint": "^1.24",
         "mockery/mockery": "^1.6",
-        "nunomaduro/collision": "^8.6"
+        "nunomaduro/collision": "^8.6",
+        "pestphp/pest": "^4.1",
+        "pestphp/pest-plugin-laravel": "^4.0"
     },
     "autoload": {
         "psr-4": {
@@ -49,10 +51,18 @@
             "php artisan migrate --force",
             "npx concurrently -c \"#93c5fd,#c4b5fd,#fb7185,#fdba74\" \"php artisan serve\" \"php artisan queue:listen --tries=1\" \"php artisan pail --timeout=0\" \"npm run dev\" --names=server,queue,logs,vite --kill-others"
         ],
+        "test": [
+            "docker compose up pgsql -d",
+            "until docker compose exec pgsql pg_isready; do echo 'Waiting for DB setup...'; sleep 1; done",
+            "@php artisan config:clear --ansi",
+            "@php artisan migrate --env=testing --force",
+            "@php artisan test"
+        ],
         "build": [
+            "docker compose down",
+            "composer test",
             "sed -i 's/DB_HOST=.*$/DB_HOST=pgsql/g' .env",
             "npm run build:ssr",
-            "docker compose down",
             "docker compose up --build -d"
         ],
         "post-autoload-dump": [
@@ -84,6 +94,7 @@
         "preferred-install": "dist",
         "sort-packages": true,
         "allow-plugins": {
+            "pestphp/pest-plugin": true,
             "php-http/discovery": true
         }
     },

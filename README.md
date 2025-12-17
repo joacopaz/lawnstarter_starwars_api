@@ -16,12 +16,15 @@ will try to run them with their commands
 
 - Set up a `.env` file (see `.env.example` for reference, the actual `.env` should
 have been provided privately), make sure the file exists and is populated.
+- Set up a `.env.testing` (also should be provided).
 
 ## Instructions
 
 1. Run `composer setup` in the root of this folder to fetch dependencies.
 
-2.
+2. You can run tests to verify integrity with `composer test`.
+
+3.
     - Run `composer build` for running it containerized @ localhost:80
 
     > Disregard the comment `pull access denied for app, repository

@@ -26,6 +26,7 @@ class ResourceController
             ])->toResponse(request())->setStatusCode(404);
 
         } catch (Exception) {
+
             return Inertia::render('error', ['status' => 500])
                 ->toResponse(request())->setStatusCode(500);
         }
