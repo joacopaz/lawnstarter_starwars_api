@@ -1,7 +1,4 @@
-# Lawnstarter Containarized Star Wars Api
-
-Welcome to this sample project for my interview,
-and thanks for taking the time to check it out!
+# Laravel multi-container full stack application
 
 ## Requirements
 
@@ -11,16 +8,42 @@ and thanks for taking the time to check it out!
 - [Composer](https://getcomposer.org/)
 - [sed](https://www.gnu.org/software/sed/) (preinstalled in most UNIX systems)
 
-> - All of the above must be present in the CLI/path since composer
+> All of the above must be present in the CLI/path since composer
 will try to run them with their commands
-> - For windows the Windows Subsystem for Linux (WSL) is recommended,
-since it has pgsql drivers pre-installed (if not they have to be set php.ini)
-> - If your local env cannot setup the pgsql driver, a last resource can be
-to build the container and run any tests inside of app-1 with docker
 
 - Set up a `.env` file (see `.env.example` for reference, the actual `.env` should
 have been provided privately), make sure the file exists and is populated.
+
 - Set up a `.env.testing` (also should be provided).
+
+## ⚠️ PostgreSQL PHP drivers  ⚠️
+
+> This step is only needed if you want to locally run dev or tests, not for composer
+build
+
+If you're missing the pgsql drivers, you will see an issue when running `composer
+dev` or `composer test` (not `composer build`, which runs the container DB command).
+The issue will look like a DB command failed (this is in the migration step).
+The easiest way to install them is to [install herd](https://herd.laravel.com).
+
+By default the laravel page install guide installs `herd-lite`, which does not include
+those drivers. It's as simple as going to the above link, choose your system and
+install it. Then restart your terminal and you should be good to go!
+
+Herd generally places its env path variable on top of other PHP installs. So generally
+you wont need any manual assignment of the variable over the pre-existing PHP one.
+You can uninstall it later once you're done with this app.
+
+You can see what php your system is using by running `php --ini`, if the ini is
+inside of the herd directory, then you're on the right path!
+
+If the system is in the `herd-lite` directory this is not ok and need herd full install.
+
+If you're using the oficial PHP full install, you can enable these extensions in
+the `php.ini` by uncommenting `pgsql` and `pdo_pgsql` from the ini file.
+
+> - For windows the Windows Subsystem for Linux (WSL) is recommended,
+since it has pgsql drivers pre-installed and will work with any install off the box.
 
 ## Instructions
 
